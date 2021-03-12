@@ -1,0 +1,9 @@
+VERBOSE = 1
+tstop = 5000
+INSERT_ACTIVES=1
+
+// cvode_active(1)
+// cvode.atol(1e-05)
+
+PARAM_ic_hold_amp=0.0025
+PARAM_ic_step_amp=0.0

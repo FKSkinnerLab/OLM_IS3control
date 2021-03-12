@@ -1,0 +1,25 @@
+func max_distance() {
+    maxd = 0
+    soma[0] distance()
+    forall for (x) {
+        if (distance(x) > maxd) {
+            maxd = distance(x)
+        }
+    }
+    return maxd
+}
+
+func max_distance_somadend() {
+    maxd = 0
+    soma distance()
+    forall {
+        if (issection("soma.*") || issection("dend.*")) {
+            for (x) {
+                if (distance(x) > maxd) {
+                    maxd = distance(x)
+                }
+            }
+        }
+    }
+    return maxd
+}

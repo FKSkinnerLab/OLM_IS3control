@@ -1,0 +1,369 @@
+// This script is used to search the synaptic parameter space of the IS3 model by varying the number of excitatory and inhibitory synapses as well as their presynaptic spike rates
+
+// load_file("nrngui.hoc")
+// load_file("init_model.hoc") // Loads IS3 model with full morphology & properties (as well as parameters and point processes)
+		
+access soma
+distance()
+
+// Set Parameters
+tstop = 10000 // (ms)
+steps_per_ms = 10 // Same as IS3 since cvode wasn't working
+dt = 0.1 // Same as IS3 since cvode wasn't working
+dendn = 0 // Specifies section - still need to adjust distance vector though
+sec_divs = PARAM_NUM_SOMA_DEND_SEGMENTS // total number of segments
+count = 0 // for indexing
+nPYR = PARAM_MAX_EXCITATORY // total - 1 to account for indexing
+nIS3 = PARAM_MAX_INHIBITORY/3
+nMS = PARAM_MAX_INHIBITORY/3
+nBIS = PARAM_MAX_INHIBITORY/3 // total - 1 to account for indexing
+
+// Initialize variables
+objectvar PYRsynapses[nPYR], IS3synapses[nIS3], MSsynapses[nMS], BISsynapses[nBIS]
+objectvar PYRncs[nPYR], IS3ncs[nIS3], MSncs[nMS], BISncs[nBIS]
+objectvar PYRnss[nPYR], IS3nss[nIS3], MSnss[nMS], BISnss[nBIS]
+objectvar PYRrisetime_vec, IS3risetime_vec, MSrisetime_vec, BISrisetime_vec
+objectvar PYRdecaytime_vec, IS3decaytime_vec, MSdecaytime_vec, BISdecaytime_vec
+objectvar PYRminweight_vec, IS3minweight_vec, MSminweight_vec, BISminweight_vec
+objectvar dist_vec, synlayer_vec, dendn_vec, fok, fdist
+objectvar frisePYR, friseIS3, friseMS, friseBIS
+objectvar fdecayPYR, fdecayIS3, fdecayMS, fdecayBIS 
+objectvar fminweightPYR, fminweightIS3, fminweightMS, fminweightBIS
+objectvar fdendn, frecV, frecSI, frecSI_inh, nil, fih, recV, recSI, recSI_inh 
+
+strdef MODEL_TOPDIR, Cell_Name, filename, filename1, filename2, filename3, filename4, filename5, filename6, filename7, filename8, filename9, filename10, filename11, filename12, filename13, filename14, filename15, filename16, filename17, model_abs_path, model_abs_path1, model_abs_path2, model_abs_path3, model_abs_path4, model_abs_path5, model_abs_path6, model_abs_path7, model_abs_path8, model_abs_path9, model_abs_path10, model_abs_path11, model_abs_path12, model_abs_path13, model_abs_path14, model_abs_path15, model_abs_path16, model_abs_path17 //
+
+MODEL_TOPDIR = "./SDprox1Output" //
+if (cell == 1){
+	MODEL_TOPDIR = "./Output_Gormadoc" //
+	Cell_Name = "Gormadoc"
+}
+if (cell == 2){
+	MODEL_TOPDIR = "./Output_Isembard" //
+	Cell_Name = "Isembard"
+}
+
+// Load Synapse Parameter Vectors
+dist_vec = new Vector(sec_divs,0)
+
+PYRrisetime_vec = new Vector(sec_divs,0)
+IS3risetime_vec = new Vector(sec_divs,0)
+MSrisetime_vec = new Vector(sec_divs,0)
+BISrisetime_vec = new Vector(sec_divs,0)
+	
+PYRdecaytime_vec = new Vector(sec_divs,0)
+IS3decaytime_vec = new Vector(sec_divs,0)
+MSdecaytime_vec = new Vector(sec_divs,0)
+BISdecaytime_vec = new Vector(sec_divs,0)
+
+PYRminweight_vec = new Vector(sec_divs,0)
+IS3minweight_vec = new Vector(sec_divs,0)
+MSminweight_vec = new Vector(sec_divs,0)
+BISminweight_vec = new Vector(sec_divs,0)
+
+dendn_vec = new Vector(sec_divs,0)
+
+fminweightPYR = new File("model_minweightvecPYR.dat")
+fminweightIS3 = new File("model_minweightvecIS3.dat")
+fminweightMS = new File("model_minweightvecMS.dat")
+fminweightBIS = new File("model_minweightvecIS3.dat")
+
+frisePYR = new File("model_risetimevecPYR.dat")
+friseIS3 = new File("model_risetimevecIS3.dat")
+friseMS = new File("model_risetimevecMS.dat")
+friseBIS = new File("model_risetimevecBIS.dat")
+
+fdecayPYR = new File("model_decaytimevecPYR.dat")
+fdecayIS3 = new File("model_decaytimevecIS3.dat")
+fdecayMS = new File("model_decaytimevecMS.dat")
+fdecayBIS = new File("model_decaytimevecBIS.dat")
+
+fdendn = new File("model_dendsectionvec.dat")
+fdist = new File("model_distvec.dat")
+
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_minweightvecPYR.dat")
+fminweightPYR.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_minweightvecIS3.dat")
+fminweightIS3.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_minweightvecMS.dat")
+fminweightMS.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_minweightvecBIS.dat")
+fminweightBIS.ropen(model_abs_path1)
+
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_risetimevecPYR.dat")
+frisePYR.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_risetimevecIS3.dat")
+friseIS3.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_risetimevecMS.dat")
+friseMS.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_risetimevecBIS.dat")
+friseBIS.ropen(model_abs_path1)
+
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_decaytimevecPYR.dat")
+fdecayPYR.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_decaytimevecIS3.dat")
+fdecayIS3.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_decaytimevecMS.dat")
+fdecayMS.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_decaytimevecBIS.dat")
+fdecayBIS.ropen(model_abs_path1)
+
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_dendsectionvec.dat")
+fdendn.ropen(model_abs_path1)
+sprint(model_abs_path1,"%s/%s",MODEL_TOPDIR, "model_distvec.dat")
+fdist.ropen(model_abs_path1)
+
+PYRminweight_vec.scanf(fminweightPYR)
+IS3minweight_vec.scanf(fminweightIS3)
+MSminweight_vec.scanf(fminweightMS)
+BISminweight_vec.scanf(fminweightBIS)
+
+PYRrisetime_vec.scanf(frisePYR)
+IS3risetime_vec.scanf(friseIS3)
+MSrisetime_vec.scanf(friseMS)
+BISrisetime_vec.scanf(friseBIS)
+
+PYRdecaytime_vec.scanf(fdecayPYR)
+IS3decaytime_vec.scanf(fdecayIS3)
+MSdecaytime_vec.scanf(fdecayMS)
+BISdecaytime_vec.scanf(fdecayBIS)
+
+dendn_vec.scanf(fdendn)
+dist_vec.scanf(fdist)
+
+PYRsyncount = 0
+IS3syncount = 0
+MSsyncount = 0
+BISsyncount = 0
+count = 0 // for indexing purposes to do with the input vectors
+
+for (dendn = 0; dendn<PARAM_NUMSEC_DEND; dendn = dendn+1){
+	print "Section Number: ", dendn_vec.x[dendn]
+			
+	for (i = 1; i<=dend[dendn].nseg; i = i+1) {
+	
+		// Specifies proportion along section (i.e. from 0 to 1)
+		prop = ((dend[dendn].L/dend[dendn].nseg)*i - (dend[dendn].L/dend[dendn].nseg)/2)/dend[dendn].L // finds the center of each segment, as defined by its proportional distance along each section; (prop = (i-0.5)/dend[dendn].nseg also works)
+			
+		// Assign optimized synapse parameter values to 9 excitatory synapses on the compartment if in SR
+		access dend[dendn]
+		for (l = 1; l<=PARAM_EXCSYNS_PER_COMPARTMENT; l = l + 1){
+			PYRsynapses[PYRsyncount] = new Exp2Syn(prop)
+			dend[dendn] PYRsynapses[PYRsyncount].loc(prop) // assign to current compartment
+			PYRsynapses[PYRsyncount].tau1 = PYRrisetime_vec.x[count]
+			PYRsynapses[PYRsyncount].tau2 = PYRdecaytime_vec.x[count]
+			PYRsynapses[PYRsyncount].e = 0
+			PYRnss[PYRsyncount] = new NetStim(prop)
+			PYRnss[PYRsyncount].interval = tstop
+			PYRnss[PYRsyncount].number = 0
+			PYRnss[PYRsyncount].start = tstop
+			PYRnss[PYRsyncount].noise = 0
+			PYRncs[PYRsyncount] = new NetCon(PYRnss[PYRsyncount], PYRsynapses[PYRsyncount])
+			PYRncs[PYRsyncount].weight = PYRminweight_vec.x[count]
+			PYRsyncount = PYRsyncount + 1
+		}
+		
+		for (l = 1; l<=PARAM_INHSYNS_PER_COMPARTMENT/3; l = l + 1){
+			IS3synapses[IS3syncount] = new Exp2Syn(prop)
+			dend[dendn] IS3synapses[IS3syncount].loc(prop) // assign to current compartment
+			IS3synapses[IS3syncount].tau1 = IS3risetime_vec.x[count]
+			IS3synapses[IS3syncount].tau2 = IS3decaytime_vec.x[count]
+			IS3synapses[IS3syncount].e = -80
+			IS3nss[IS3syncount] = new NetStim(prop)
+			IS3nss[IS3syncount].interval = tstop
+			IS3nss[IS3syncount].number = 0
+			IS3nss[IS3syncount].start = tstop
+			IS3nss[IS3syncount].noise = 0
+			IS3ncs[IS3syncount] = new NetCon(IS3nss[IS3syncount], IS3synapses[IS3syncount])
+			IS3ncs[IS3syncount].weight = IS3minweight_vec.x[count]
+			IS3syncount = IS3syncount + 1
+		}
+		for (l = 1; l<=PARAM_INHSYNS_PER_COMPARTMENT/3; l = l + 1){
+			MSsynapses[MSsyncount] = new Exp2Syn(prop)
+			dend[dendn] MSsynapses[MSsyncount].loc(prop) // assign to current compartment
+			MSsynapses[MSsyncount].tau1 = MSrisetime_vec.x[count]
+			MSsynapses[MSsyncount].tau2 = MSdecaytime_vec.x[count]
+			MSsynapses[MSsyncount].e = -80
+			MSnss[MSsyncount] = new NetStim(prop)
+			MSnss[MSsyncount].interval = tstop
+			MSnss[MSsyncount].number = 0
+			MSnss[MSsyncount].start = tstop
+			MSnss[MSsyncount].noise = 0
+			MSncs[MSsyncount] = new NetCon(MSnss[MSsyncount], MSsynapses[MSsyncount])
+			MSncs[MSsyncount].weight = MSminweight_vec.x[count]
+			MSsyncount = MSsyncount + 1
+		}
+		for (l = 1; l<=PARAM_INHSYNS_PER_COMPARTMENT/3; l = l + 1){
+			BISsynapses[BISsyncount] = new Exp2Syn(prop)
+			dend[dendn] BISsynapses[BISsyncount].loc(prop) // assign to current compartment
+			BISsynapses[BISsyncount].tau1 = BISrisetime_vec.x[count]
+			BISsynapses[BISsyncount].tau2 = BISdecaytime_vec.x[count]
+			BISsynapses[BISsyncount].e = -80
+			BISnss[BISsyncount] = new NetStim(prop)
+			BISnss[BISsyncount].interval = tstop
+			BISnss[BISsyncount].number = 0
+			BISnss[BISsyncount].start = tstop
+			BISnss[BISsyncount].noise = 0
+			BISncs[BISsyncount] = new NetCon(BISnss[BISsyncount], BISsynapses[BISsyncount])
+			BISncs[BISsyncount].weight = BISminweight_vec.x[count]
+			BISsyncount = BISsyncount + 1
+		}
+		
+		count = count + 1		
+	}	
+}
+// Generate randomized indexing for random synapse selection
+objref r, randPYRindex, randIS3index, randMSindex, randBISindex
+r = new Random()
+randPYRindex = new Vector(nPYR)
+randIS3index = new Vector(nIS3)
+randMSindex = new Vector(nMS)
+randBISindex = new Vector(nBIS)
+tempindex = 0
+repeats = 1 // Initialize at 1 so it does skip the while loop
+for (i = 0; i < nPYR; i = i + 1){
+	while (repeats > 0){
+		repeats = 0 // Reset the count of repeats to 0 for next iteration
+		tempindex = r.discunif(-1, nPYR-1) // Generate random integer
+		for k=0,nPYR-1 repeats = repeats + (tempindex == randPYRindex.x[k]) // Check if value repeats (i.e. if repeats > 0)
+	}
+	randPYRindex.x[i] = tempindex // Assign value if not repeated
+	repeats = 1 // Re-initialize to 1 so it doesn't skip while loop
+}
+tempindex = 0
+repeats = 1 // Initialize at 1 so it does skip the while loop
+for (i = 0; i < nIS3; i = i + 1){
+	while (repeats > 0){
+		repeats = 0 // Reset the count of repeats to 0 for next iteration
+		tempindex = r.discunif(-1, nIS3-1) // Generate random integer
+		for k=0,nIS3-1 repeats = repeats + (tempindex == randIS3index.x[k]) // Check if value repeats (i.e. if repeats > 0)
+	}
+	randIS3index.x[i] = tempindex // Assign value if not repeated
+	repeats = 1 // Re-initialize to 1 so it doesn't skip while loop
+}
+tempindex = 0
+repeats = 1 // Initialize at 1 so it does skip the while loop
+for (i = 0; i < nMS; i = i + 1){
+	while (repeats > 0){
+		repeats = 0 // Reset the count of repeats to 0 for next iteration
+		tempindex = r.discunif(-1, nMS-1) // Generate random integer
+		for k=0,nMS-1 repeats = repeats + (tempindex == randMSindex.x[k]) // Check if value repeats (i.e. if repeats > 0)
+	}
+	randMSindex.x[i] = tempindex // Assign value if not repeated
+	repeats = 1 // Re-initialize to 1 so it doesn't skip while loop
+}
+tempindex = 0
+repeats = 1 // Initialize at 1 so it does skip the while loop
+for (i = 0; i < nBIS; i = i + 1){
+	while (repeats > 0){
+		repeats = 0 // Reset the count of repeats to 0 for next iteration
+		tempindex = r.discunif(-1, nBIS-1) // Generate random integer
+		for k=0,nBIS-1 repeats = repeats + (tempindex == randBISindex.x[k]) // Check if value repeats (i.e. if repeats > 0)
+	}
+	randBISindex.x[i] = tempindex // Assign value if not repeated
+	repeats = 1 // Re-initialize to 1 so it doesn't skip while loop
+}
+
+objectvar frandPYRindex
+sprint(filename2,"model_RandomizedPYRIndices.dat")
+frandPYRindex = new File(filename2)
+frandPYRindex.wopen(filename2)
+randPYRindex.printf(frandPYRindex) // Use printf instead of vwrite if you want a text file instead of a binary file
+frandPYRindex.close()
+	
+objectvar frandIS3index
+sprint(filename6,"model_RandomizedIS3Indices.dat")
+frandIS3index = new File(filename6)
+frandIS3index.wopen(filename6)
+randIS3index.printf(frandIS3index) // Use printf instead of vwrite if you want a text file instead of a binary file
+frandIS3index.close()
+
+objectvar frandMSindex
+sprint(filename3,"model_RandomizedMSIndices.dat")
+frandMSindex = new File(filename3)
+frandMSindex.wopen(filename3)
+randMSindex.printf(frandMSindex) // Use printf instead of vwrite if you want a text file instead of a binary file
+frandMSindex.close()
+
+objectvar frandBISindex
+sprint(filename3,"model_RandomizedBISIndices.dat")
+frandBISindex = new File(filename3)
+frandBISindex.wopen(filename3)
+randBISindex.printf(frandBISindex) // Use printf instead of vwrite if you want a text file instead of a binary file
+frandBISindex.close()
+
+access soma
+
+// Record presynaptic events at all synapses. 
+// Note that rexcvec & rinhvec values should be the same as excprespiketrains & inhprespiketrains values.
+objectvar PYRprespiketrains[nPYR], IS3prespiketrains[nIS3], MSprespiketrains[nMS], BISprespiketrains[nBIS]
+	
+for i=0,nPYR-1 PYRprespiketrains[i] = new Vector()
+for i=0,nIS3-1 IS3prespiketrains[i] = new Vector()
+for i=0,nMS-1 MSprespiketrains[i] = new Vector()
+for i=0,nBIS-1 BISprespiketrains[i] = new Vector()
+
+print IS3syncount
+print MSsyncount
+print BISsyncount
+
+print nIS3
+print nMS
+print nBIS
+
+for i=0,nPYR-1 PYRncs[i].record(PYRprespiketrains[i])
+for i=0,nIS3-1 IS3ncs[i].record(IS3prespiketrains[i])
+for i=0,nMS-1 MSncs[i].record(MSprespiketrains[i])
+for i=0,nBIS-1 BISncs[i].record(BISprespiketrains[i])
+
+objectvar frecPYRPreSpikeTrains, frecIS3PreSpikeTrains, frecMSPreSpikeTrains, frecBISPreSpikeTrains, apc, apctimes
+apc = new APCount(0.5)
+apctimes = new Vector()
+apc.thresh = -20
+apc.record(apctimes)
+
+proc f() {
+	
+	numsyns = $1
+	synfreq = $2
+	numsyns_PYR = $3
+	
+	// Assign inhibitory spike times
+	for (i=0; i < numsyns; i = i + 1){ 
+
+		IS3nss[randIS3index.x[i]].interval = (1/synfreq)*1000 // Convert Hz to ms
+		IS3nss[randIS3index.x[i]].number = tstop/((1/synfreq)*1000) // total duration divided by interval
+		IS3nss[randIS3index.x[i]].start = 0
+		IS3nss[randIS3index.x[i]].noise = 0
+	}
+	// if (numsyns>0){
+		for (i=0; i < numsyns_PYR; i = i + 1){ 
+			PYRnss[randPYRindex.x[i]].interval = (1/synfreq)*1000 // Convert Hz to ms
+			PYRnss[randPYRindex.x[i]].number = tstop/((1/synfreq)*1000) // total duration divided by interval
+			PYRnss[randPYRindex.x[i]].start = 78.125 //i.e. 225 degrees later (trough)
+			PYRnss[randPYRindex.x[i]].noise = 0
+		}
+	// }
+
+	// Run Simulation and Record Vm Vector
+	// recV = new Vector()
+	// recV.record(&soma.v(0.5))
+	run()
+	
+	// then zero out the inputs to reset the synapses
+	for (i=0; i < numsyns; i = i + 1){ 
+
+		IS3nss[randIS3index.x[i]].interval = tstop // Convert Hz to ms
+		IS3nss[randIS3index.x[i]].number = 0 // total duration divided by interval
+		IS3nss[randIS3index.x[i]].start = tstop
+		IS3nss[randIS3index.x[i]].noise = 0
+	}
+	// if (numsyns>0){
+		for (i=0; i < numsyns_PYR; i = i + 1){ 
+			PYRnss[randPYRindex.x[i]].interval = tstop // Convert Hz to ms
+			PYRnss[randPYRindex.x[i]].number = 0 // total duration divided by interval
+			PYRnss[randPYRindex.x[i]].start = tstop
+			PYRnss[randPYRindex.x[i]].noise = 0
+		}
+	// }
+}

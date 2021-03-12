@@ -1,0 +1,12 @@
+// load_file("nrngui.hoc")
+cell = 2
+load_file("sim_params.hoc")
+load_file("cell_selector.hoc")
+load_file("param_active_cond.hoc")
+load_file("params.hoc")
+load_file("AP_clamp.hoc")
+load_file("utils/surfarea.hoc")
+load_file("utils/gtot.hoc")
+load_file("utils/max_distance.hoc")
+load_file("utils/rn.hoc")
+print "DC input resistance of cell is ", rn(), "megohms"

@@ -1,0 +1,47 @@
+
+/*
+ * Surface area calculations
+ */
+func surfarea() {
+    totarea = 0
+    forall for (x) {
+        totarea = totarea + area(x)
+    }
+    return totarea
+}
+func surfarea_soma() {
+    totarea = 0
+    forall for (x) {
+        if (issection("soma.*")) {
+            totarea = totarea + area(x)
+        }
+    }
+    return totarea
+}
+func surfarea_dend() {
+    totarea = 0
+    forall for (x) {
+        if (issection("dend.*")) {
+            totarea = totarea + area(x)
+        }
+    }
+    return totarea
+}
+func surfarea_axon() {
+    totarea = 0
+    forall for (x) {
+        if (issection("axon.*")) {
+            totarea = totarea + area(x)
+        }
+    }
+    return totarea
+}
+func surfarea_somadend() {
+    totarea = 0
+    forall for (x) {
+        if (issection("soma.*") || issection("dend.*")) {
+            totarea = totarea + area(x)
+        }
+    }
+    return totarea
+}

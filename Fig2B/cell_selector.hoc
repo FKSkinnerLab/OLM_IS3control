@@ -1,0 +1,20 @@
+strdef cellname
+
+if (cell == 1) {
+    load_file("morph/Gormadoc.hoc")
+    load_file("param_files/model_Gormadoc.hoc")
+    cellname = "Gormadoc"
+} else if (cell == 2) {
+    load_file("morph/Isembard.hoc")
+    load_file("param_files/model_Isembard.hoc")
+    cellname = "Isembard"
+} else if (cell == 5) {
+    load_file("morph/Ferdinand.hoc")
+    load_file("param_files/model_Ferdinand.hoc")
+    cellname = "Ferdinand"
+} else {
+
+    // No cell provided, terminate
+    printf("ERROR: no cell parameter provided!\n")
+    quit()
+}

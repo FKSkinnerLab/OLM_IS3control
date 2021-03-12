@@ -1,0 +1,27 @@
+objref ms, mt
+strdef s, msname
+proc pname() {local i, j, k
+	for i = -1,3 {
+		ms = new MechanismStandard($s1,i)
+			print "\n", $s1, "  vartype = ", i
+			for j = 0, ms.count()-1 {
+				k = ms.name(s, j)
+				print j, s, " size = ", k
+			}
+	}
+
+}
+
+proc ptype() {local i,j
+	for i = 0,1 {
+		mt = new MechanismType(i)
+		for j = 0, mt.count()-1 {
+			mt.select(j)
+			mt.selected(msname)
+			print  "\n\n", msname, " mechanismtype = " j
+			pname(msname)
+		}
+	}
+}
+
+ptype()

@@ -1,0 +1,174 @@
+// Calculates total conductance, in pS
+// 10^4 factor required to convert from S/cm^2 to pS/um^2.
+// gtot then has units of pS.
+// final conversion factor of 10^-3 ensures we return nS.
+
+func gtot_H() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*") || issection("dend.*")) {
+            gtot = gtot + (gkhbar_Ih(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Nad() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gna_Nadend(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Nas() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*")) {
+            gtot = gtot + (gna_Nasoma(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Naa() {
+    gtot = 0
+    forall for(x) {
+        if (issection("axon.*")) {
+            gtot = gtot + (gna_Naaxon(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrfd() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gbar_Ikdrf(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrfs() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*")) {
+            gtot = gtot + (gbar_Ikdrf(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrfa() {
+    gtot = 0
+    forall for(x) {
+        if (issection("axon.*")) {
+            gtot = gtot + (gbar_Ikdrfaxon(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrsd() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gbar_Ikdrs(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrss() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*")) {
+            gtot = gtot + (gbar_Ikdrs(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Kdrsa() {
+    gtot = 0
+    forall for(x) {
+        if (issection("axon.*")) {
+            gtot = gtot + (gbar_Ikdrsaxon(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_KAd() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gbar_Ika(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_KAs() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*")) {
+            gtot = gtot + (gbar_Ika(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_CaL() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gcalbar_cal(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_CaT() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gbar_cat(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_AHP() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gkbar_kca(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Md() {
+    gtot = 0
+    forall for(x) {
+        if (issection("dend.*")) {
+            gtot = gtot + (gbar_IM(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
+
+func gtot_Ms() {
+    gtot = 0
+    forall for(x) {
+        if (issection("soma.*")) {
+            gtot = gtot + (gbar_IM(x) * 10^4 * area(x))
+        }
+    }
+    return gtot * 10^-3
+}
