@@ -1,3 +1,4 @@
+# OLM_IS3control
 "Deciphering how specialized interneuron-specific cell types contribute to circuit function"
 ==============================================================================
 
@@ -80,5 +81,4 @@ python PlotResults.py
 
 Plotting:
 Plots can be found in the "Plots_" folders.
-# OLM_IS3control
 # OLM_IS3control
