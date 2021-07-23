@@ -1,5 +1,5 @@
 # OLM_IS3control
-"Deciphering how specialized interneuron-specific cell types contribute to circuit function"
+"Deciphering how interneuron specific 3 cells control oriens lacunosum-moleculare cells to contribute to circuit function"
 ==============================================================================
 
 This repository contains several self-contained folders for running the simulations described in "Deciphering how specialized interneuron-specific cell types contribute to circuit function". Accordingly, folders are labeled corresponding to the figure panels in the manuscript. Code was tested most recently in Python 3.7.6 on a Macbook Pro, MacOS Big Sur 11.2.2, and so some modification of these instructions may be needed for other versions and operating platforms.
