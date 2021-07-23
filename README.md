@@ -29,13 +29,13 @@ nrnivmodl
 Choosing the OLM cell model:
 In init_model.hoc adjust the "cell" variable (line 2) to numeric values of either 1 or 2, corresponding to cells 1 and 2 in the manuscript. Note that in the code, cell 1 is also referred to as "Gormadoc" and cell 2 is also referred to in "Isembard".
 
-Run PRC simulations (Fig 3A,B,D):
+Run PRC simulations:
 python init.py
 
-Run code for plotting traces of interest (Fig 3C):
+Run code for plotting traces of interest:
 python init_tracesofinterest.py
 
-Run code for plotting cell 1 vs cell 2 (Fig 4; note that init.py needs to have been run for both cell 1 and 2 for this code to work):
+Run code for plotting cell 1 vs cell 2 (note that init.py needs to have been run for both cell 1 and 2 for this code to work):
 python AnalyzeResulte.py
 
 Plotting:
